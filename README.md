@@ -6,7 +6,7 @@
 ## Packages
 
 | Package | Description |
-| ----------------------- |
+| ------- | ----------- |
 | @material-ui/core | ^3.3.2 |
 | @material-ui/icons | ^3.0.1 |
 | axios | ^0.18.0 |
