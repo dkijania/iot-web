@@ -15,40 +15,30 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { mainListItems, secondaryListItems } from './listItems';
-import Grid from '@material-ui/core/Grid';
+import SimpleLineChart from './SimpleLineChart';
+import SimpleTable from './SimpleTable';
 import AccountCircle from '@material-ui/icons/AccountCircle';
-import errorImage from '../common/images/error.png'
-import Card from '@material-ui/core/Card';
-import CardActionArea from '@material-ui/core/CardActionArea';
-import CardActions from '@material-ui/core/CardActions';
-import CardContent from '@material-ui/core/CardContent';
-import CardMedia from '@material-ui/core/CardMedia';
-import Button from '@material-ui/core/Button';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import MailIcon from '@material-ui/icons/Mail';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import { Link } from 'react-router-dom';
-import image from '../common/images/chart.jpg';
 import { styles } from './DashboardStyles';
-import { getDashboardData } from '../actions/dashboard.actions';
+import { getChannelData } from '../actions/channel.actions';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import _ from 'lodash';
 
-class Dashboard extends React.Component {
-  componentDidMount() {
+class Channel extends React.Component {
 
-    this.props.getDashboardData(this.props.history.location.state.username)
+  componentDidMount() {
+    console.log("componentDidMount", this.props)
+    this.props.getChannelData(this.props.history.location.state.channelId)
   }
 
   state = {
     open: true,
     anchorEl: null,
     mobileMoreAnchorEl: null,
-    isLoading: '',
-    error: '',
-    data: ''
   };
 
   handleProfileMenuOpen = event => {
@@ -176,7 +166,8 @@ class Dashboard extends React.Component {
                   aria-owns={isMenuOpen ? 'material-appbar' : undefined}
                   aria-haspopup="true"
                   onClick={this.handleProfileMenuOpen}
-                  color="inherit">
+                  color="inherit"
+                >
                   <AccountCircle />
                 </IconButton>
               </div>
@@ -184,6 +175,7 @@ class Dashboard extends React.Component {
           </AppBar>
           {renderMobileMenu}
           {renderMenu}
+
           <Drawer
             variant="permanent"
             classes={{
@@ -204,83 +196,33 @@ class Dashboard extends React.Component {
           <main className={classes.content}>
             <div className={classes.appBarSpacer} />
             <Typography variant="h4" gutterBottom component="h2">
-              Channels
+              Orders
             </Typography>
-            <div styles={{ flexGrow: 1 }}>
-              <Grid cols="4" container spacing={24}>
-                {this.renderChannelsOrProgress()}
-              </Grid>
+            <Typography component="div" className={classes.chartContainer}>
+              <SimpleLineChart data={this.channel.chartData} />
+            </Typography>
+            <Typography variant="h4" gutterBottom component="h2">
+              Products
+            </Typography>
+            <div className={classes.tableContainer}>
+              <SimpleTable />
             </div>
           </main>
         </div>
       </React.Fragment>
     );
   }
-
-
-  renderChannelsOrProgress() {
-    const { classes } = this.props;
-    if (this.props.isLoading)
-      return (<CircularProgress className={classes.progress} size={100} />)
-    if (this.props.error)
-      return (<Card className={classes.errorCard}>
-        <CardActionArea>
-          <CardContent>
-            <img src={errorImage} className={classes.errorImage} alt='error icon' />
-            <Typography gutterBottom variant="h5" component="h2">
-              Error while loading channels</Typography>
-            <Typography component="p">
-              {this.props.error}</Typography>
-          </CardContent>
-        </CardActionArea>
-      </Card>)
-
-    let tiles = _.map(this.props.data.data, function (element) {
-      return {
-        title: element.name,
-        id: element.id
-      }
-    });
-
-    return (tiles.map(tile => (
-      <Grid item xs={3}>
-        <Card className={classes.card}  >
-          <CardActionArea className={classes.card}>
-            <CardMedia
-              component="img"
-              alt={tile.title}
-              className={classes.media}
-              image={image}
-              title={tile.title}
-            />
-            <CardContent>
-              <Typography gutterBottom variant="h5" component="h2">
-                {tile.title} </Typography>
-              <Typography component="p">
-                {tile.id}</Typography>
-            </CardContent>
-          </CardActionArea>
-          <CardActions>
-            <Button size="small" color="primary"  onPress={() => this.props.history.push('Channel', tile.id)}>Show</Button>
-            <Button size="small" color="primary">Raw Data</Button>
-          </CardActions>
-        </Card>
-      </Grid>
-    )))
-  }
 }
 
-Dashboard.propTypes = {
+Channel.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
 const mapStateToProps = state => {
 
   return {
-    isLoading: state.dashboard.isLoading,
-    error: state.dashboard.error,
-    data: state.dashboard.data
+    chartData: state.chartData
   }
 }
 
-export default connect(mapStateToProps, { getDashboardData })(withStyles(styles)(withRouter(Dashboard)))
+export default connect(mapStateToProps, { getChannelData })(withStyles(styles)(withRouter(Channel)))

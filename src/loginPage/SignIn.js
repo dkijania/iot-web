@@ -15,7 +15,8 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import Background from '../common/images/backgroundImage.jpg';
 import { NavigationBarSimple } from '../mainPage/components/NavigationBar';
 import { withRouter } from 'react-router-dom';
-import axios from 'axios';
+import { connect } from 'react-redux';
+import { authenticate } from '../actions/login.actions.js';
 
 const styles = theme => ({
     main: {
@@ -33,7 +34,19 @@ const styles = theme => ({
     toolbarTitle: {
         flex: 1,
     },
-
+    errorDiv: {
+        width: '100%', // Fix IE 11 issue.
+        backgroundColor: '#f44842',
+        marginBottom: theme.spacing.unit * 3
+    },
+    errorText: {
+        width: '100%', // Fix IE 11 issue.
+        marginBottom: theme.spacing.unit * 1,
+        marginTop: theme.spacing.unit * 1,
+        marginLeft: theme.spacing.unit * 1,
+        marginRigth: theme.spacing.unit * 1,
+        color: 'white'
+    },
     layout: {
         width: 'auto',
         display: 'block', // Fix IE 11 issue.
@@ -70,26 +83,34 @@ class SignIn extends React.Component {
 
     onSubmit = (e) => {
         e.preventDefault();
-        this.props.history.push('/Dashboard');        
+        const { login, password } = this.state
+        this.props.authenticate(login, password)
     }
+
+    handleChange(e) {
+        const { name, value } = e.target;
+        this.setState({ [name]: value });
+    }
+
+    componentWillReceiveProps() {
+        if (this.props.isAuthenticated) {
+            this.props.history.push({
+                pathname: '/Dashboard',
+                state: { username: this.props.username}});
+        }
+      }
 
     render() {
         const { classes } = this.props;
-
         return (
             <React.Fragment>
                 <CssBaseline />
-
                 <div className={classes.main}>
                     {NavigationBarSimple(this.props)}
                     <div className={classes.layout}>
                         <Paper className={classes.paper}>
-                            <Avatar className={classes.avatar}>
-                                <LockIcon />
-                            </Avatar>
-                            <Typography component="h1" variant="h5">
-                                Sign in
-                            </Typography>
+                            {this.renderErrorIfNeeded(classes)}
+                            {this.renderSingInHeader(classes)}
                             {this.renderForm(classes)}
                         </Paper>
                     </div>
@@ -98,12 +119,35 @@ class SignIn extends React.Component {
         );
     }
 
+    renderErrorIfNeeded() {
+        const { classes } = this.props;
+        if (this.props.error)
+            return (
+                <div className={classes.errorDiv}>
+                    <p className={classes.errorText}>{this.props.error.message}</p></div>)
+    }
+
+    renderSingInHeader() {
+        const { classes } = this.props;
+        return (
+            <div>
+                <Avatar className={classes.avatar}>
+                    <LockIcon />
+                </Avatar>
+                <Typography component="h1" variant="h5">
+                    Sign in
+                </Typography>
+            </div>
+        )
+    }
+
     renderForm(classes) {
         return (
             <form className={classes.form} onSubmit={this.onSubmit.bind(this)}>
                 <FormControl margin="normal" required fullWidth>
-                    <InputLabel htmlFor="email">Email Address</InputLabel>
-                    <Input id="email" name="email" autoComplete="email" autoFocus />
+                    <InputLabel htmlFor="login">Login</InputLabel>
+                    <Input id="login" name="login" autoComplete="login" autoFocus  value={this.props.login.login}
+                    placeholder="login" onChange={this.handleChange.bind(this)}/>
                 </FormControl>
                 <FormControl margin="normal" required fullWidth>
                     <InputLabel htmlFor="password">Password</InputLabel>
@@ -111,20 +155,27 @@ class SignIn extends React.Component {
                         name="password"
                         type="password"
                         id="password"
+                        value={this.props.password}
                         autoComplete="current-password"
+                        onChange={this.handleChange.bind(this)}
                     />
                 </FormControl>
                 <FormControlLabel
                     control={<Checkbox value="remember" color="primary" />}
                     label="Remember me" />
-                <Button
-                    type="submit"
-                    fullWidth
-                    variant="contained"
-                    color="primary"
-                    className={classes.submit}
-                > Sign in</Button>
+                {this.renderButton()}
             </form>);
+    }
+
+    renderButton() {
+        const { classes } = this.props;
+        return (<Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color={ this.props.isLoading ? "secondary" : "primary"}
+            disabled= { this.props.isLoading}
+            className={ classes.submit}> Sign in</Button>)
     }
 }
 
@@ -132,4 +183,16 @@ SignIn.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(withRouter(SignIn));
+const mapStateToProps = state => {
+
+    return {
+        username: state.login.username,
+        password: state.password,
+        isLoading: state.login.isLoading,
+        error: state.login.error,
+        isAuthenticated: state.login.isAuthenticated,
+        login: state.login.login,
+    }
+}
+
+export default connect(mapStateToProps, { authenticate })(withStyles(styles)(withRouter(SignIn)))
