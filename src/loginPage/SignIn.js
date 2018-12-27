@@ -92,11 +92,11 @@ class SignIn extends React.Component {
         this.setState({ [name]: value });
     }
 
-    componentWillReceiveProps() {
-        if (this.props.isAuthenticated) {
-            this.props.history.push({
+    componentWillReceiveProps(newProps) {
+        if (newProps.isAuthenticated) {
+            newProps.history.push({
                 pathname: '/Dashboard',
-                state: { username: this.props.username}});
+                state: { username: newProps.username}});
         }
       }
 

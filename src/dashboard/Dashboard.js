@@ -42,6 +42,13 @@ class Dashboard extends React.Component {
     this.props.getDashboardData(this.props.history.location.state.username)
   }
 
+  openChannelPage = (id) => {
+    this.props.history.push({
+      pathname: '/Channel/' + id,
+      state: { channelId: id }
+    });
+  }
+
   state = {
     open: true,
     anchorEl: null,
@@ -242,7 +249,12 @@ class Dashboard extends React.Component {
       }
     });
 
-    return (tiles.map(tile => (
+    return tiles.map(tile => this.renderSingleTile(tile))
+  }
+
+  renderSingleTile = (tile) => {
+    const { classes } = this.props;
+    return (
       <Grid item xs={3}>
         <Card className={classes.card}  >
           <CardActionArea className={classes.card}>
@@ -261,12 +273,12 @@ class Dashboard extends React.Component {
             </CardContent>
           </CardActionArea>
           <CardActions>
-            <Button size="small" color="primary"  onPress={() => this.props.history.push('Channel', tile.id)}>Show</Button>
+            <Button size="small" color="primary" onClick={() => this.openChannelPage(tile.id)}>Show</Button>
             <Button size="small" color="primary">Raw Data</Button>
           </CardActions>
         </Card>
       </Grid>
-    )))
+    )
   }
 }
 

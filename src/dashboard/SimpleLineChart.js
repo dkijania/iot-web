@@ -12,12 +12,15 @@ import Legend from 'recharts/lib/component/Legend';
 /**
  * data: {x: name, y: value}
  */
-function SimpleLineChart(data) {
+function SimpleLineChart(chartData) {
   return (
     // 99% per https://github.com/recharts/recharts/issues/172
     <ResponsiveContainer width="99%" height={320}>
-      <LineChart data={data}>
-        <XAxis dataKey="name" />
+      <LineChart data={chartData.chartData}>
+        <XAxis
+          dataKey="name"
+          domain = {['auto', 'auto']}
+        />
         <YAxis />
         <CartesianGrid vertical={false} strokeDasharray="3 3" />
         <Tooltip />

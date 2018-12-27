@@ -4,14 +4,14 @@ import env from '../env/config'
 export const getChannelData = (channelId) => {
    
     return (dispatch) => {
-        console.log(env.gatewayHost + "chariot/gateway/webapp/channel/get?channelId="+channelId)
+        console.log(env.gatewayHost + "chariot/gateway/webapp/measurement/getData?channelId="+channelId)
      
         dispatch({ type: 'LOADING_CHANNEL_DATA'});     
     
       
         axios({
             method: 'get',
-            url: env.gatewayHost + "chariot/gateway/webapp/channel/get?channelId="+channelId,
+            url: env.gatewayHost + "chariot/gateway/webapp/measurement/getData?channelId="+channelId,
             config: {
                 headers: {
                     'Content-Type': 'multipart/form-data',

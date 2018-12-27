@@ -16,6 +16,7 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
 import { mainListItems, secondaryListItems } from './listItems';
 import SimpleLineChart from './SimpleLineChart';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import SimpleTable from './SimpleTable';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import MailIcon from '@material-ui/icons/Mail';
@@ -26,7 +27,6 @@ import { styles } from './DashboardStyles';
 import { getChannelData } from '../actions/channel.actions';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
-import _ from 'lodash';
 
 class Channel extends React.Component {
 
@@ -39,6 +39,9 @@ class Channel extends React.Component {
     open: true,
     anchorEl: null,
     mobileMoreAnchorEl: null,
+    isLoading: false,
+    error: '',
+    data: '',
   };
 
   handleProfileMenuOpen = event => {
@@ -121,6 +124,13 @@ class Channel extends React.Component {
       </Menu>
     );
 
+    if (this.props.isLoading)
+      return (<CircularProgress className={classes.progress} size={100} />)
+
+    if(this.props.chartData)  
+      var data = this.props.chartData.map(measurement => ({name: new Date(measurement.timestamp).toLocaleString("en-US"), Value: measurement.value})); 
+       
+
     return (
       <React.Fragment>
         <CssBaseline />
@@ -195,17 +205,14 @@ class Channel extends React.Component {
           </Drawer>
           <main className={classes.content}>
             <div className={classes.appBarSpacer} />
-            <Typography variant="h4" gutterBottom component="h2">
-              Orders
-            </Typography>
             <Typography component="div" className={classes.chartContainer}>
-              <SimpleLineChart data={this.channel.chartData} />
+              <SimpleLineChart chartData={data} />
             </Typography>
             <Typography variant="h4" gutterBottom component="h2">
               Products
             </Typography>
             <div className={classes.tableContainer}>
-              <SimpleTable />
+              <SimpleTable chartData={data} />
             </div>
           </main>
         </div>
@@ -221,7 +228,9 @@ Channel.propTypes = {
 const mapStateToProps = state => {
 
   return {
-    chartData: state.chartData
+    chartData: state.channel.data.data,
+    error: state.channel.error,
+    isLoading: state.channel.isLoading
   }
 }
 
